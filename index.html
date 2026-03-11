@@ -735,4 +735,121 @@ const ratingFeedbacks = {
   1: "Sizi anlayamadık — ya da anlayamadınız?",
   2: "Belki de gerçekten farklısınızdır…",
   3: "Bazı noktalar dokunmuş olabilir.",
-  4: "Biraz mı 
+  4: "Biraz mı tanıdık geldi?",
+  5: "Yarısı size uydu — tesadüf mü?",
+  6: "Düşündürücü, değil mi?",
+  7: "Hâlâ tamamen tesadüf mü dersiniz?",
+  8: "Çarpıcı bir benzerlik, öyle değil mi?",
+  9: "Neredeyse mükemmel — nasıl bilebildik?",
+  10: "Tam isabet! Ama sizi bir sır bekleniyor..."
+};
+
+let current = 0;
+let selectedRating = 0;
+
+function startQuiz() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById('qCounter').textContent = `SORU ${current + 1} / ${questions.length}`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('progressFill').style.width = `${(current / questions.length) * 100}%`;
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  container.style.opacity = '0';
+
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.style.animationDelay = `${i * 0.1}s`;
+    btn.onclick = () => selectOption(btn);
+    container.appendChild(btn);
+  });
+
+  setTimeout(() => { container.style.opacity = '1'; container.style.transition = 'opacity 0.4s ease'; }, 50);
+}
+
+function selectOption(btn) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  setTimeout(() => {
+    current++;
+    if (current < questions.length) {
+      showQuestion();
+    } else {
+      showLoading();
+    }
+  }, 400);
+}
+
+function showLoading() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  let i = 0;
+  const interval = setInterval(() => {
+    document.getElementById('loadingText').textContent = loadingMessages[i % loadingMessages.length];
+    i++;
+  }, 700);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    showResult();
+  }, 3500);
+}
+
+function showResult() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  buildStars();
+}
+
+function buildStars() {
+  const container = document.getElementById('starsContainer');
+  container.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'star-btn';
+    btn.textContent = i;
+    btn.onclick = () => rate(i);
+    container.appendChild(btn);
+  }
+}
+
+function rate(score) {
+  selectedRating = score;
+  document.getElementById('scoreDisplay').textContent = score;
+
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i < score);
+  });
+
+  document.getElementById('ratingFeedback').textContent = ratingFeedbacks[score];
+
+  // Show reveal after rating
+  setTimeout(() => {
+    document.getElementById('revealSection').style.display = 'block';
+    document.getElementById('revealSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 800);
+}
+
+function restartQuiz() {
+  current = 0;
+  selectedRating = 0;
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('revealSection').style.display = 'none';
+  document.getElementById('scoreDisplay').textContent = '—';
+  document.getElementById('ratingFeedback').textContent = '';
+  document.getElementById('intro').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
