@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derin Kişilik Analizi</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0808;
+    --surface: #110e0e;
+    --gold: #c9a84c;
+    --gold-light: #e8c96d;
+    --cream: #f0e8d8;
+    --muted: #6b5f52;
+    --accent: #8b2635;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* Animated starfield background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(201,168,76,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(201,168,76,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 60%, rgba(201,168,76,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 80%, rgba(201,168,76,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 70%, rgba(201,168,76,0.2) 0%, transparent 100%),
+      radial-gradient(2px 2px at 35% 45%, rgba(201,168,76,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 25%, rgba(201,168,76,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 85%, rgba(201,168,76,0.2) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(139,38,53,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 0% 100%, rgba(201,168,76,0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* INTRO SCREEN */
+  #intro {
+    text-align: center;
+    animation: fadeUp 1.2s ease both;
+  }
+
+  .eye-symbol {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 32px;
+    position: relative;
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  .eye-symbol svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .overline {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 6vw, 44px);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--cream);
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+
+  .divider {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 32px auto;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 16px 48px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+    z-index: -1;
+  }
+
+  .btn:hover {
+    color: var(--bg);
+  }
+
+  .btn:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* QUIZ SCREEN */
+  #quiz { display: none; }
+
+  .progress-bar {
+    width: 100%;
+    height: 1px;
+    background: rgba(201,168,76,0.15);
+    margin-bottom: 56px;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    box-shadow: 0 0 8px var(--gold);
+  }
+
+  .q-counter {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: block;
+  }
+
+  .question-text {
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--cream);
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    padding: 18px 24px;
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    cursor: pointer;
+    background: rgba(201,168,76,0.02);
+    transition: all 0.3s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    font-weight: 300;
+  }
+
+  .option::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--gold);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+  }
+
+  .option:hover {
+    border-color: rgba(201,168,76,0.5);
+    background: rgba(201,168,76,0.05);
+    padding-left: 32px;
+  }
+
+  .option:hover::before {
+    transform: scaleY(1);
+  }
+
+  .option.selected {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+    color: var(--gold-light);
+    padding-left: 32px;
+  }
+
+  .option.selected::before {
+    transform: scaleY(1);
+  }
+
+  /* LOADING */
+  #loading {
+    display: none;
+    text-align: center;
+    padding: 80px 0;
+  }
+
+  .oracle-spinner {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 32px;
+    position: relative;
+  }
+
+  .oracle-spinner::before, .oracle-spinner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    border-top-color: var(--gold);
+    animation: spin 1.5s linear infinite;
+  }
+
+  .oracle-spinner::after {
+    inset: 8px;
+    border-top-color: var(--accent);
+    animation-duration: 1s;
+    animation-direction: reverse;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* RESULT */
+  #result {
+    display: none;
+    animation: fadeUp 1s ease both;
+  }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .result-badge {
+    display: inline-block;
+    padding: 8px 24px;
+    border: 1px solid var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: var(--gold);
+    margin-bottom: 28px;
+  }
+
+  .result-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 5vw, 36px);
+    font-weight: 400;
+    color: var(--cream);
+    line-height: 1.3;
+    margin-bottom: 16px;
+  }
+
+  .result-box {
+    background: rgba(201,168,76,0.04);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-left: 2px solid var(--gold);
+    padding: 36px 40px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .result-box::before {
+    content: '❝';
+    position: absolute;
+    top: -16px;
+    left: 32px;
+    font-size: 48px;
+    color: var(--gold);
+    opacity: 0.3;
+    line-height: 1;
+  }
+
+  .result-text {
+    font-size: 18px;
+    line-height: 1.9;
+    color: var(--cream);
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  .result-text strong {
+    color: var(--gold-light);
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  /* RATING */
+  .rating-section {
+    text-align: center;
+    padding: 40px 0;
+    border-top: 1px solid rgba(201,168,76,0.1);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    margin-bottom: 40px;
+  }
+
+  .rating-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .rating-question {
+    font-size: 20px;
+    font-style: italic;
+    color: var(--cream);
+    margin-bottom: 32px;
+    font-weight: 300;
+  }
+
+  .stars {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .star-btn {
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .star-btn:hover, .star-btn.active {
+    background: rgba(201,168,76,0.1);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .score-display {
+    font-family: 'Cinzel', serif;
+    font-size: 48px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .score-label {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  .rating-feedback {
+    margin-top: 20px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--gold-light);
+    min-height: 24px;
+    transition: opacity 0.3s ease;
+  }
+
+  /* REVEAL */
+  .reveal-section {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    background: rgba(139,38,53,0.08);
+    border: 1px solid rgba(139,38,53,0.3);
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .reveal-icon {
+    font-size: 40px;
+    margin-bottom: 20px;
+  }
+
+  .reveal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+
+  .reveal-text {
+    font-size: 16px;
+    color: var(--cream);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  .reveal-text a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+  }
+
+  .restart-btn {
+    margin-top: 48px;
+    display: inline-block;
+    padding: 12px 36px;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.3s ease;
+  }
+
+  .restart-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .screen { transition: opacity 0.4s ease; }
+
+  /* Floating particles */
+  .particle {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: float linear infinite;
+    opacity: 0;
+    z-index: 0;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.4; }
+    90% { opacity: 0.1; }
+    100% { transform: translateY(-20px) translateX(20px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particle" style="left:15%;animation-duration:12s;animation-delay:0s;"></div>
+<div class="particle" style="left:30%;animation-duration:18s;animation-delay:3s;"></div>
+<div class="particle" style="left:55%;animation-duration:14s;animation-delay:7s;"></div>
+<div class="particle" style="left:72%;animation-duration:20s;animation-delay:1s;"></div>
+<div class="particle" style="left:88%;animation-duration:16s;animation-delay:5s;"></div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="intro" class="screen">
+    <div class="eye-symbol">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="40" cy="40" rx="35" ry="20" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="3 3"/>
+        <ellipse cx="40" cy="40" rx="35" ry="20" stroke="#c9a84c" stroke-width="0.5" opacity="0.3" transform="rotate(30 40 40)"/>
+        <circle cx="40" cy="40" r="10" stroke="#c9a84c" stroke-width="0.8"/>
+        <circle cx="40" cy="40" r="5" fill="#c9a84c" opacity="0.6"/>
+        <circle cx="40" cy="40" r="2" fill="#c9a84c"/>
+        <line x1="40" y1="5" x2="40" y2="20" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+        <line x1="40" y1="60" x2="40" y2="75" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+        <line x1="5" y1="40" x2="20" y2="40" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+        <line x1="60" y1="40" x2="75" y2="40" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+      </svg>
+    </div>
+
+    <span class="overline">Psişik Kişilik Analizi · 2025</span>
+    <h1>Ruhunuzun<br><em>Gizli Haritası</em></h1>
+
+    <div class="divider"></div>
+
+    <p class="subtitle">
+      15 sorudan oluşan bu derin analiz,<br>
+      kimsenin göremediği gerçek benliğinizi<br>
+      gün yüzüne çıkaracak.
+    </p>
+
+    <button class="btn" onclick="startQuiz()">Analizi Başlat</button>
+
+    <div class="divider"></div>
+    <p style="font-size:13px;color:var(--muted);letter-spacing:1px;">
+      Bugüne kadar <strong style="color:var(--gold)">847,293</strong> kişi analiz edildi
+    </p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz" class="screen">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <span class="q-counter" id="qCounter">SORU 1 / 15</span>
+    <p class="question-text" id="questionText"></p>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading" class="screen">
+    <div class="oracle-spinner"></div>
+    <p class="loading-text" id="loadingText">KİŞİLİĞİNİZ ANALİZ EDİLİYOR</p>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result" class="screen">
+    <div class="result-header">
+      <div class="result-badge">KİŞİSEL ANALİZ RAPORU</div>
+      <h2 class="result-title">Sen, <em>Herkes Gibi Değilsin</em></h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="result-box">
+      <p class="result-text">
+        İçinde <strong>derin bir çelişki</strong> taşıyorsunuz — hem insanlarla bağlantı kurmak hem de zaman zaman yalnız kalmak istiyorsunuz. Dışarıdan bakıldığında sakin ve uyumlu görünseniz de, <strong>içinizde çok daha karmaşık bir dünya</strong> dönüyor. Başkalarına ihtiyaç duyduğunuzdan daha güçlü görünmeye çalışıyorsunuz ve bu sizi zaman zaman yalnızlaştırıyor.
+
+        <br><br>
+
+        Çok <strong>zeki ve sezgili</strong> birisiniz — insanları çabuk okuyorsunuz, ama kendinizin ne kadar anlaşılmaz göründüğünü de biliyorsunuz. Geçmişte verilen bazı kararlardan hâlâ pişmanlık duyuyorsunuz; <strong>"keşke farklı yapsaydım"</strong> diye düşündüğünüz anlar var. Ama aynı zamanda değişim konusunda tereddütlüsünüz.
+
+        <br><br>
+
+        En büyük güçlüğünüz şu: <strong>gerçek potansiyelinizin henüz farkında değilsiniz.</strong> Sizi tanıyan insanlar, sizin kendi hakkınızda düşündüğünüzden çok daha fazlasını görüyor. Siz hâlâ kendinize yeterince güvenmiyorsunuz — oysa başkalarına güven aşılamakta iyisiniz.
+
+        <br><br>
+
+        Bazı insanlar sizi <strong>anlaşılması zor</strong> bulur. Bu onların sorunu, sizin değil. Çünkü siz sıradan bir zihin değilsiniz — ve bunu içten içe zaten hissediyorsunuz.
+      </p>
+    </div>
+
+    <!-- RATING -->
+    <div class="rating-section">
+      <span class="rating-label">DEĞERLENDİRME</span>
+      <p class="rating-question">Bu analiz size ne kadar doğru geldi?</p>
+
+      <div class="score-display" id="scoreDisplay">—</div>
+      <p class="score-label">/ 10</p>
+
+      <div class="stars" id="starsContainer"></div>
+
+      <p class="rating-feedback" id="ratingFeedback"></p>
+    </div>
+
+    <!-- REVEAL (shows after rating) -->
+    <div class="reveal-section" id="revealSection">
+      <div class="reveal-icon">🎭</div>
+      <h3 class="reveal-title">BARNUM ETKİSİ</h3>
+      <p class="reveal-text">
+        Az önce okuduğunuz analiz <strong>herkese aynı şekilde</strong> verildi.<br><br>
+        Bu bir psikoloji deneyi: <em>Barnum Etkisi</em> (ya da Forer Etkisi), genel ve belirsiz ifadeleri kişisel olarak doğru algılama eğilimimizi tanımlar. Burçlar, tarot, kişilik testlerinin çoğu bu ilkeyle çalışır.<br><br>
+        <strong style="color:var(--gold)">Sizi kandırmak için değil — kendinizi daha iyi tanımanız için.</strong>
+      </p>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="restart-btn" onclick="restartQuiz()">Testi Yeniden Başlat</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Sosyal ortamlarda genellikle kendinizi nasıl hissedersiniz?",
+    opts: ["Enerjilenirim, insanlarla olmak hoşuma gider", "Keyif alırım ama sonra yorulabilirim", "Çoğu zaman gözlemci konumunda kalırım", "Tercih etsem yalnız olmak daha rahat gelir"]
+  },
+  {
+    q: "Bir karar verirken sizi en çok ne yönlendirir?",
+    opts: ["Mantık ve veriler", "Sezgi ve içgüdüler", "Başkalarının görüşü", "Geçmiş deneyimlerim"]
+  },
+  {
+    q: "Zor bir dönemden geçerken genellikle ne yaparsınız?",
+    opts: ["Çözüm odaklı hareket ederim", "İçime çekilirim ve düşünürüm", "Güvendiğim birine açılırım", "Dikkatimi başka şeylere veririm"]
+  },
+  {
+    q: "Başkalarının sizi nasıl gördüğü konusunda ne düşünürsünüz?",
+    opts: ["Gerçek beni görmüyorlar", "Yüzeysel olarak görüyorlar", "Oldukça iyi anlıyorlar", "Umursamıyorum"]
+  },
+  {
+    q: "Geçmişteki kararlarınızı düşündüğünüzde ne hissedersiniz?",
+    opts: ["Hepsinden ders çıkardım", "Bazılarından pişmanlık duyuyorum", "Çoğunlukla doğru yaptım", "Çok düşünmemeye çalışırım"]
+  },
+  {
+    q: "Yaratıcılık ve hayal gücü sizin için ne ifade eder?",
+    opts: ["Hayatımın merkezinde", "Zaman zaman başvururum", "Daha çok pratik düşünürüm", "Önemsiyorum ama yeterince kullanamıyorum"]
+  },
+  {
+    q: "İnsanlarla ilişkilerinizde sizi en çok ne zorlur?",
+    opts: ["Güvenmek zor geliyor", "Sınır koymak güç", "Anlaşılmamak canımı sıkıyor", "Beklentileri yönetmek"]
+  },
+  {
+    q: "Değişim karşısında ilk tepkiniz nedir?",
+    opts: ["Heyecanla karşılarım", "Uyum sağlarım ama zaman alır", "Temkinli yaklaşırım", "Direnirim"]
+  },
+  {
+    q: "Kendi potansiyelinize ne kadar güveniyorsunuz?",
+    opts: ["Tam anlamıyla güveniyorum", "Çoğunlukla güveniyorum", "Zaman zaman şüpheye düşüyorum", "Hâlâ keşfediyorum"]
+  },
+  {
+    q: "Başkalarını ne kadar kolay okuyabilirsiniz?",
+    opts: ["Çok hızlı seziyorum", "Genelde iyi okurum", "Yanılabilirim ama deniyorum", "Pek anlamam"]
+  },
+  {
+    q: "Yalnızlıkla ilişkiniz nasıl?",
+    opts: ["Olmazsa olmazım", "Zaman zaman ihtiyaç duyuyorum", "Tolere edebiliyorum", "Pek sevmiyorum"]
+  },
+  {
+    q: "Kendinize en sert eleştiriyi hangi konuda yapıyorsunuz?",
+    opts: ["Yeterince çalışmıyorum", "Duygularımı ifade edemiyorum", "Başkalarına öncelik veriyorum", "Kendimi geliştirmiyorum"]
+  },
+  {
+    q: "Hayatta en çok ne arayışı içindesiniz?",
+    opts: ["Anlam ve amaç", "Bağlantı ve sevgi", "Özgürlük ve bağımsızlık", "Başarı ve tanınma"]
+  },
+  {
+    q: "Sizi 'anlaşılmış' hissettiren ne olur?",
+    opts: ["Söylemeden hissedilmek", "Dikkatle dinlenmek", "Soru sorulması", "Değer gören eylemlerim"]
+  },
+  {
+    q: "Bu testi neden yaptınız?",
+    opts: ["Merak ettim", "Kendimi daha iyi tanımak istedim", "Eğlence için", "Birisi önerdı / gördüm"]
+  }
+];
+
+const loadingMessages = [
+  "BEYİN DALGALARI ANALİZ EDİLİYOR",
+  "KİŞİLİK PROFİLİ OLUŞTURULUYOR",
+  "DERİN ÖRÜNTÜLER TARANIYÖR",
+  "SONUÇLAR DERLENIYOR",
+  "RAPORUNUZ HAZIRLANIYOR"
+];
+
+const ratingFeedbacks = {
+  1: "Sizi anlayamadık — ya da anlayamadınız?",
+  2: "Belki de gerçekten farklısınızdır…",
+  3: "Bazı noktalar dokunmuş olabilir.",
+  4: "Biraz mı 
